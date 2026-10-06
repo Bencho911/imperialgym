@@ -1,0 +1,120 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import Photo from './Photo.astro';
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import { locations } from '../data/locations';
+import { site, whatsappMessages } from '../data/site';
+import { whatsappUrl } from '../lib/whatsapp';
+
+/* Sin enlace confirmado, "Cómo llegar" busca la sede en Google Maps. */
+const directionsUrl = (name: string, mapsUrl: string | null) =>
+  mapsUrl ??
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Imperial Gym Sede ${name} ${site.city} ${site.region}`)}`;
+---
+
+<section class="section" aria-labelledby="sedes">
+  <div class="container">
+    <SectionHeading id="sedes" title="Sedes" intro="Escoge la que te quede más cerca. Escríbele directo a cada sede." />
+    <div class="locations">
+      {locations.map((loc) => (
+        <article class="location" aria-labelledby={`sede-${loc.id}`}>
+          {loc.mapEmbedUrl ? (
+            <iframe
+              class="location__map"
+              src={loc.mapEmbedUrl}
+              title={`Mapa de la Sede ${loc.name}`}
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            />
+          ) : (
+            <Photo
+              image={null}
+              alt={`Mapa de la Sede ${loc.name} (pendiente)`}
+              label={`[MAPA SEDE ${loc.name.toUpperCase()}]`}
+              ratio="16 / 9"
+            />
+          )}
+          <div class="location__body">
+            <h3 class="location__name" id={`sede-${loc.id}`}>Sede {loc.name}</h3>
+            <p class="location__address">
+              <Icon name="map-pin" />
+              <span>{loc.address}, {site.city}</span>
+            </p>
+            <div class="location__actions">
+              <Button
+                href={directionsUrl(loc.name, loc.mapsUrl)}
+                variant="secondary"
+                icon="navigation"
+                external
+                externalLabel="(abre Google Maps)"
+              >
+                Cómo llegar
+              </Button>
+              <Button
+                href={whatsappUrl(whatsappMessages.location(loc.name), loc.whatsapp)}
+                icon="message-circle"
+                external
+                externalLabel="(abre WhatsApp)"
+              >
+                Escribir a la sede
+              </Button>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .locations {
+    display: grid;
+    gap: var(--space-8);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--col-min-lg)), 1fr));
+  }
+  .location {
+    display: grid;
+    align-content: start;
+    background: var(--color-surface);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .location__map {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+  }
+  .location :global(.photo-placeholder) {
+    border-radius: 0;
+    border-width: 0 0 var(--border-thin);
+  }
+  .location__body {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-6);
+  }
+  .location__name {
+    font-size: var(--step-4);
+  }
+  .location__address {
+    display: flex;
+    gap: var(--space-2);
+    align-items: start;
+    color: var(--color-text-soft);
+  }
+  .location__address :global(.icon) {
+    margin-top: var(--space-1);
+    color: var(--color-text-accent);
+  }
+  .location__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .location__actions > :global(*) {
+    flex: 1 1 auto;
+  }
+</style>

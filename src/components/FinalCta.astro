@@ -1,0 +1,61 @@
+---
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import { site, whatsappMessages } from '../data/site';
+import { whatsappUrl } from '../lib/whatsapp';
+---
+
+<section class="section final-cta" aria-labelledby="contacto">
+  <div class="container final-cta__inner">
+    <h2 id="contacto" class="final-cta__title texture-worn">Ven a entrenar</h2>
+    <p class="final-cta__lead">Escríbenos por WhatsApp para resolver dudas o agendar una visita.</p>
+    <div class="final-cta__actions">
+      <Button href={whatsappUrl(whatsappMessages.visit)} icon="message-circle" external externalLabel="(abre WhatsApp)">
+        Escríbenos por WhatsApp
+      </Button>
+      {site.instagram.url ? (
+        <Button href={site.instagram.url} variant="secondary" icon="instagram" external externalLabel="(abre Instagram)">
+          Síguenos en Instagram
+        </Button>
+      ) : (
+        <p class="final-cta__handle">
+          <Icon name="instagram" />
+          <span>{site.instagram.handle}</span>
+        </p>
+      )}
+    </div>
+    <p class="final-cta__phone">WhatsApp: {site.whatsappLabel}</p>
+  </div>
+</section>
+
+<style>
+  .final-cta {
+    background: var(--color-accent-deep);
+  }
+  .final-cta__inner {
+    display: grid;
+    gap: var(--space-6);
+    justify-items: start;
+  }
+  .final-cta__title {
+    font-size: var(--step-7);
+  }
+  .final-cta__lead {
+    font-size: var(--step-1);
+  }
+  .final-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .final-cta__handle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: var(--weight-semibold);
+  }
+  .final-cta__phone {
+    font-size: var(--step--1);
+  }
+</style>

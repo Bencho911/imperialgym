@@ -1,0 +1,141 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import ColumnMark from './ColumnMark.astro';
+import { site } from '../data/site';
+import { locations } from '../data/locations';
+import { hours } from '../data/hours';
+import { navItems } from '../data/navigation';
+import { formatRange } from '../lib/format';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__grid">
+    <div class="site-footer__brand">
+      <Logo size="md" />
+      <p>Gimnasio en {site.city}, {site.region}.</p>
+      {site.instagram.url ? (
+        <a class="site-footer__social" href={site.instagram.url} target="_blank" rel="noopener noreferrer">
+          <Icon name="instagram" />
+          <span>{site.instagram.handle}</span>
+          <span class="visually-hidden">(abre Instagram)</span>
+        </a>
+      ) : (
+        <p class="site-footer__social">
+          <Icon name="instagram" />
+          <span>{site.instagram.handle}</span>
+        </p>
+      )}
+    </div>
+
+    <div>
+      <h2 class="site-footer__title">Horario</h2>
+      <dl class="site-footer__hours">
+        {hours.map((row) => (
+          <div>
+            <dt>{row.label}</dt>
+            <dd>{formatRange(row.opens, row.closes)}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+
+    <div>
+      <h2 class="site-footer__title">Sedes</h2>
+      <ul class="site-footer__list" role="list">
+        {locations.map((loc) => (
+          <li>
+            <strong>Sede {loc.name}</strong>
+            <span>{loc.address}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <nav aria-label="Pie de página">
+      <h2 class="site-footer__title">Secciones</h2>
+      <ul class="site-footer__list" role="list">
+        {navItems.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <div class="container site-footer__legal">
+    <ColumnMark size="var(--icon-md)" class="site-footer__mark" />
+    <p>© {year} {site.name}. {site.city}, {site.region}, {site.country}.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: var(--space-stack) var(--space-24);
+    background: var(--color-surface);
+    border-top: var(--border-thin) solid var(--color-border);
+    font-size: var(--step--1);
+  }
+  .site-footer__grid {
+    display: grid;
+    gap: var(--space-10);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--col-min-sm)), 1fr));
+  }
+  .site-footer__brand {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+    align-content: start;
+  }
+  .site-footer__social {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--target-min);
+    font-weight: var(--weight-semibold);
+  }
+  .site-footer__title {
+    font-size: var(--step-2);
+    margin-bottom: var(--space-3);
+  }
+  .site-footer__hours {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .site-footer__hours dt {
+    font-weight: var(--weight-semibold);
+  }
+  .site-footer__hours dd {
+    color: var(--color-text-muted);
+  }
+  .site-footer__list {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+  .site-footer__list li {
+    display: grid;
+  }
+  .site-footer__list span {
+    color: var(--color-text-muted);
+  }
+  .site-footer__list a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+  }
+  .site-footer :global(.site-footer__mark) {
+    color: var(--color-accent);
+  }
+  .site-footer__legal {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-12);
+    padding-top: var(--space-6);
+    border-top: var(--border-thin) solid var(--color-border);
+    color: var(--color-text-muted);
+  }
+</style>

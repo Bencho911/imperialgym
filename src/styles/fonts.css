@@ -1,0 +1,51 @@
+/* Fuentes autoalojadas (subconjunto latino, cubre tildes y ñ). Licencia OFL en /public/fonts. */
+@font-face {
+  font-family: "Anton";
+  src: url("/fonts/anton-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/montserrat-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/montserrat-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("/fonts/montserrat-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+  Respaldo con métricas ajustadas a Anton: mientras Anton carga (font-display: swap),
+  el titular ocupa el mismo ancho y no se reacomoda (CLS ≈ 0).
+  Valores medidos comparando anchos de texto real: Anton / Impact = 93.4 %, Anton / Arial Narrow = 68.3 %.
+*/
+@font-face {
+  font-family: "Anton Fallback";
+  src: local("Impact");
+  size-adjust: 93.4%;
+  ascent-override: 126%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Anton Fallback Narrow";
+  src: local("Arial Narrow");
+  size-adjust: 68.3%;
+  ascent-override: 173%;
+  descent-override: 48%;
+  line-gap-override: 0%;
+}

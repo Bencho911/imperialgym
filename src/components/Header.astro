@@ -1,0 +1,252 @@
+---
+import Logo from './Logo.astro';
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import { whatsappUrl } from '../lib/whatsapp';
+import { whatsappMessages } from '../data/site';
+import { navItems } from '../data/navigation';
+---
+
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <a href="#inicio" class="site-header__logo">
+      <Logo size="sm" />
+      <span class="visually-hidden">, ir al inicio</span>
+    </a>
+
+    <!-- El botón va antes del menú en el HTML: al abrirlo, Tab entra directo a los enlaces. -->
+    <button
+      type="button"
+      class="menu-toggle"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      data-menu-toggle
+      hidden
+    >
+      <span class="menu-toggle__icon menu-toggle__icon--open"><Icon name="menu" size="var(--icon-md)" /></span>
+      <span class="menu-toggle__icon menu-toggle__icon--close"><Icon name="x" size="var(--icon-md)" /></span>
+      <span class="visually-hidden">Menú</span>
+    </button>
+
+    <!-- Sin JS el menú se ve en una segunda fila; con JS, en móvil se vuelve colapsable. -->
+    <nav class="site-nav" id="site-nav" aria-label="Principal">
+      <ul role="list">
+        {navItems.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <Button
+      href={whatsappUrl(whatsappMessages.general)}
+      size="sm"
+      icon="message-circle"
+      external
+      externalLabel="(abre WhatsApp)"
+      class="site-header__cta"
+    >
+      <span class="cta-long">Escríbenos por WhatsApp</span>
+      <span class="cta-short">WhatsApp</span>
+    </Button>
+
+  </div>
+</header>
+
+<script is:inline>
+  /* Inline a propósito: corre antes del primer pintado, así el menú móvil no aparece abierto y luego salta. */
+  (function () {
+    var header = document.querySelector('[data-header]');
+    var toggle = header && header.querySelector('[data-menu-toggle]');
+    var nav = header && header.querySelector('#site-nav');
+    if (!header || !toggle || !nav) return;
+
+    function setOpen(open, returnFocus) {
+      header.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      if (!open && returnFocus) toggle.focus();
+    }
+
+    header.classList.add('has-menu');
+    toggle.hidden = false;
+
+    toggle.addEventListener('click', function () {
+      setOpen(!header.classList.contains('is-open'));
+    });
+    // Al elegir una sección, el menú se cierra.
+    nav.addEventListener('click', function (event) {
+      if (event.target.closest('a')) setOpen(false);
+    });
+    // Esc cierra y devuelve el foco al botón.
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && header.classList.contains('is-open')) setOpen(false, true);
+    });
+    // Tocar fuera del encabezado cierra el menú.
+    document.addEventListener('click', function (event) {
+      if (header.classList.contains('is-open') && !header.contains(event.target)) setOpen(false);
+    });
+    window.matchMedia('(min-width: 64rem)').addEventListener('change', function () {
+      setOpen(false);
+    });
+  })();
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background: var(--color-bg);
+    border-bottom: var(--border-thin) solid var(--color-border);
+  }
+  .site-header__inner {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'logo cta'
+      'nav nav';
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    padding-block: var(--space-2);
+  }
+  .site-header__logo {
+    grid-area: logo;
+    display: inline-flex;
+    min-height: var(--target-min);
+    align-items: center;
+    text-decoration: none;
+  }
+  .site-header :global(.site-header__cta) {
+    grid-area: cta;
+    justify-self: end;
+  }
+  .site-nav {
+    grid-area: nav;
+  }
+  .site-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+  .site-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+    padding-inline: var(--space-1);
+    font-size: var(--step--1);
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    color: var(--color-text-soft);
+  }
+  .site-nav a:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-thickness: var(--border-thick);
+    text-decoration-color: var(--color-accent);
+  }
+  .cta-long {
+    display: none;
+  }
+
+  .menu-toggle {
+    grid-area: toggle;
+    display: grid;
+    place-items: center;
+    width: var(--target-min);
+    height: var(--target-min);
+    padding: 0;
+    background: transparent;
+    border: var(--border-thin) solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+  .menu-toggle:active {
+    transform: scale(0.94);
+  }
+  .menu-toggle__icon--close,
+  .is-open .menu-toggle__icon--open {
+    display: none;
+  }
+  .is-open .menu-toggle__icon--close {
+    display: contents;
+  }
+
+  /* Menú colapsable (solo con JS y por debajo de 64rem). */
+  @media (max-width: 63.999rem) {
+    .has-menu .site-header__inner {
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: 'logo cta toggle';
+    }
+    .has-menu .site-nav {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      padding: var(--space-4) var(--space-gutter) var(--space-8);
+      background: var(--color-bg);
+      border-bottom: var(--border-thick) solid var(--color-accent);
+      visibility: hidden;
+      opacity: 0;
+      clip-path: inset(0 0 100% 0);
+      /* Salida: más corta y con ease-in. */
+      transition:
+        clip-path var(--duration-fast) var(--ease-in),
+        opacity var(--duration-fast) var(--ease-in),
+        visibility 0s linear var(--duration-fast);
+    }
+    .has-menu.is-open .site-nav {
+      visibility: visible;
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+      transition:
+        clip-path var(--duration-base) var(--ease-out-strong),
+        opacity var(--duration-base) var(--ease-out-strong),
+        visibility 0s;
+    }
+    .has-menu .site-nav ul {
+      flex-direction: column;
+      gap: 0;
+    }
+    .has-menu .site-nav a {
+      width: 100%;
+      padding-block: var(--space-2);
+      font-family: var(--font-display);
+      font-size: var(--step-4);
+      font-weight: var(--weight-regular);
+      text-transform: uppercase;
+      color: var(--color-text);
+      border-bottom: var(--border-thin) solid var(--color-border);
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .cta-long {
+      display: inline;
+    }
+    .cta-short {
+      display: none;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .site-header__inner {
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: 'logo nav cta';
+      gap: var(--space-8);
+      min-height: var(--header-height);
+    }
+    .site-nav ul {
+      justify-content: center;
+      gap: var(--space-6);
+    }
+    .site-nav a {
+      font-size: var(--step-0);
+    }
+    .menu-toggle {
+      display: none;
+    }
+  }
+</style>

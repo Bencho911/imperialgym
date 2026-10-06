@@ -1,0 +1,678 @@
+---
+/*
+  /estilos — guía viva del sistema de diseño (no indexada).
+  Los colores y contrastes se leen de src/styles/tokens.css en el build:
+  si alguien cambia un token, esta página recalcula los contrastes.
+*/
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Logo from '../components/Logo.astro';
+import Button from '../components/Button.astro';
+import tokensCss from '../styles/tokens.css?raw';
+import { parseColorTokens, contrastRatio } from '../lib/contrast';
+
+const c = parseColorTokens(tokensCss);
+
+const brand = ['red-vivid', 'red-brand', 'red-wine', 'red-merch', 'black', 'white'];
+const reds = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'].map((s) => `red-${s}`);
+const neutrals = ['950', '900', '800', '700', '500', '400', '300', '200', '0'].map((s) => `neutral-${s}`);
+
+type Level = 'texto' | 'grande' | 'grafico' | 'prohibido';
+const required: Record<Level, number> = { texto: 4.5, grande: 3, grafico: 3, prohibido: 3 };
+
+/* Combinaciones reales que usará el sitio. Agregar aquí cada combinación nueva. */
+const rawPairs: { fg: string; bg: string; use: string; level: Level }[] = [
+  { fg: 'text', bg: 'bg', use: 'Texto principal sobre fondo', level: 'texto' },
+  { fg: 'text', bg: 'surface-raised', use: 'Texto en tarjetas', level: 'texto' },
+  { fg: 'text-soft', bg: 'bg', use: 'Texto secundario fuerte', level: 'texto' },
+  { fg: 'text-muted', bg: 'bg', use: 'Texto secundario / notas', level: 'texto' },
+  { fg: 'text-muted', bg: 'surface-raised', use: 'Notas dentro de tarjetas', level: 'texto' },
+  { fg: 'text-accent', bg: 'bg', use: 'Texto rojo sobre fondo (precios, enlaces)', level: 'texto' },
+  { fg: 'text-accent', bg: 'surface-raised', use: 'Texto rojo dentro de tarjetas', level: 'texto' },
+  { fg: 'text-on-accent', bg: 'accent', use: 'Botón principal', level: 'texto' },
+  { fg: 'text-on-accent', bg: 'accent-hover', use: 'Botón principal (hover)', level: 'texto' },
+  { fg: 'text-on-accent', bg: 'accent-pressed', use: 'Botón principal (presionado)', level: 'texto' },
+  { fg: 'text', bg: 'red-800', use: 'Franjas y banners rojo de marca', level: 'texto' },
+  { fg: 'text', bg: 'accent-deep', use: 'Cajas vino', level: 'texto' },
+  { fg: 'text-soft', bg: 'red-800', use: 'Texto secundario sobre franja roja (horario)', level: 'texto' },
+  { fg: 'text-soft', bg: 'surface', use: 'Texto secundario en tarjetas de sede', level: 'texto' },
+  { fg: 'text-muted', bg: 'surface', use: 'Texto secundario en el pie', level: 'texto' },
+  { fg: 'text-accent', bg: 'surface', use: 'Íconos rojos en tarjetas', level: 'grafico' },
+  { fg: 'text-muted', bg: 'surface-raised', use: 'Etiquetas de fotos pendientes', level: 'texto' },
+  { fg: 'text-accent-on-light', bg: 'label-bg', use: 'Etiqueta blanca con texto rojo', level: 'texto' },
+  { fg: 'text-on-light', bg: 'label-bg', use: 'Texto oscuro sobre blanco', level: 'texto' },
+  { fg: 'focus', bg: 'bg', use: 'Anillo de foco sobre fondo', level: 'grafico' },
+  { fg: 'focus', bg: 'accent', use: 'Anillo de foco sobre rojo', level: 'grafico' },
+  { fg: 'border-strong', bg: 'bg', use: 'Bordes de controles (campos, filtros)', level: 'grafico' },
+  { fg: 'red-vivid', bg: 'bg', use: 'Rojo del logo / gráficos grandes', level: 'grafico' },
+  { fg: 'accent', bg: 'bg', use: 'Rojo principal como texto sobre negro', level: 'prohibido' },
+  { fg: 'red-brand', bg: 'bg', use: 'Rojo de marca como texto sobre negro', level: 'prohibido' },
+];
+const pairs = rawPairs.map((p) => {
+  const fg = c[`color-${p.fg}`];
+  const bg = c[`color-${p.bg}`];
+  const ratio = contrastRatio(fg, bg);
+  return { ...p, fgHex: fg, bgHex: bg, ratio, pass: ratio >= required[p.level] };
+});
+
+const allowedFail = pairs.filter((p) => p.level !== 'prohibido' && !p.pass);
+if (allowedFail.length) {
+  throw new Error(`Contraste insuficiente: ${allowedFail.map((p) => p.use).join(', ')}`);
+}
+
+const typeSteps = [
+  { step: '7', sample: 'Plan Ultra', role: 'Titular del hero' },
+  { step: '6', sample: 'Clases grupales', role: 'Título de sección' },
+  { step: '5', sample: 'Horario de atención', role: 'Título de bloque' },
+  { step: '4', sample: '$120.000', role: 'Precios' },
+  { step: '3', sample: 'Sede Centro', role: 'Título de tarjeta' },
+];
+const bodySteps = [
+  { step: '2', role: 'Subtítulo / entradilla' },
+  { step: '1', role: 'Texto destacado' },
+  { step: '0', role: 'Texto base' },
+  { step: '-1', role: 'Notas y letra pequeña' },
+];
+const spaces = ['1', '2', '3', '4', '5', '6', '8', '10', '12', '16', '20', '24'];
+const radii = ['sm', 'md', 'lg'];
+const motion = [
+  { token: '--duration-fast', value: '160 ms', use: 'Hover y presionado' },
+  { token: '--duration-base', value: '240 ms', use: 'Cambios de estado' },
+  { token: '--duration-slow', value: '400 ms', use: 'Menú, filtros' },
+  { token: '--duration-entrance', value: '700 ms', use: 'Entradas de sección (máximo)' },
+  { token: '--ease-out-strong', value: 'cubic-bezier(0.16, 1, 0.3, 1)', use: 'Entradas tipo golpe (expo.out)' },
+  { token: '--ease-out', value: 'cubic-bezier(0.33, 1, 0.68, 1)', use: 'Interfaz (power3.out)' },
+];
+const fmt = (n: number) => n.toFixed(2);
+---
+
+<BaseLayout title="Estilos · Imperial Gym" description="Sistema de diseño de Imperial Gym." noindex>
+  <header class="page-head container">
+    <Logo size="md" />
+    <div>
+      <h1>Sistema de diseño</h1>
+      <p class="lead">
+        Tokens de color, tipografía, espaciado y movimiento para el sitio de Imperial Gym. Los contrastes se calculan
+        desde <code>src/styles/tokens.css</code> cada vez que se compila el sitio.
+      </p>
+      <p class="note">El logo es un marcador de texto hasta recibir el archivo original.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section aria-labelledby="color">
+      <h2 id="color">Color</h2>
+
+      <h3>Colores originales de la marca</h3>
+      <p class="muted">Medidos de las piezas de Instagram. Se conservan como referencia; la interfaz usa la escala de abajo.</p>
+      <ul class="swatches" role="list">
+        {brand.map((t) => (
+          <li class="swatch">
+            <span class="swatch__chip swatch__chip--outlined" style={`background:${c[`color-${t}`]}`}></span>
+            <code>--color-{t}</code>
+            <span>{c[`color-${t}`]}</span>
+          </li>
+        ))}
+      </ul>
+
+      <h3>Escala roja</h3>
+      <div class="rationale">
+        <p>
+          <strong>Rojo principal: red-600 (#B11527, el rojo del merch).</strong> Con texto blanco encima da 6.99:1 y pasa
+          AA en cualquier tamaño, así que sirve para todos los botones. El rojo de las piezas (#8B1D14) casi desaparece
+          sobre negro (2.09:1) y el rojo del logo (#F01C18) no pasa con texto blanco (4.30:1). Además, es el rojo del
+          producto físico que la gente ya asocia con la marca.
+        </p>
+        <p>
+          Para texto rojo sobre fondo oscuro se usa red-400 (6.05:1). El red-800 coincide con el rojo de las piezas y
+          el red-900 con el vino de sus cajas.
+        </p>
+      </div>
+      <ul class="swatches swatches--scale" role="list">
+        {reds.map((t) => {
+          const hex = c[`color-${t}`];
+          return (
+            <li class="swatch">
+              <span class="swatch__chip" style={`background:${hex}`}></span>
+              <code>{t.replace('red-', '')}</code>
+              <span>{hex}</span>
+              <span class="swatch__ratios">
+                <span>Blanco {fmt(contrastRatio('#FFFFFF', hex))}</span>
+                <span>Negro {fmt(contrastRatio(hex, c['color-black']))}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      <h3>Neutros</h3>
+      <ul class="swatches swatches--scale" role="list">
+        {neutrals.map((t) => {
+          const hex = c[`color-${t}`];
+          return (
+            <li class="swatch">
+              <span class="swatch__chip swatch__chip--outlined" style={`background:${hex}`}></span>
+              <code>{t.replace('neutral-', '')}</code>
+              <span>{hex}</span>
+            </li>
+          );
+        })}
+      </ul>
+
+      <h3>Proporción 60-30-10</h3>
+      <div class="ratio-bar" aria-label="60 % negro, 30 % blanco, 10 % rojo">
+        <span style="flex:60;background:var(--color-bg)">Negro 60</span>
+        <span style="flex:30;background:var(--color-label-bg);color:var(--color-text-on-light)">Blanco 30</span>
+        <span style="flex:10;background:var(--color-accent)">Rojo 10</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="contraste">
+      <h2 id="contraste">Contraste verificado</h2>
+      <p class="muted">
+        WCAG 2.2 AA: 4.5:1 para texto normal, 3:1 para texto grande y elementos gráficos. Si una combinación permitida
+        baja del mínimo, el build falla.
+      </p>
+      <div class="table-wrap">
+        <table class="contrast">
+          <thead>
+            <tr>
+              <th scope="col">Muestra</th>
+              <th scope="col">Uso</th>
+              <th scope="col">Tokens</th>
+              <th scope="col">Relación</th>
+              <th scope="col">Resultado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pairs.map((p) => (
+              <tr>
+                <td>
+                  <span class="sample" style={`color:${p.fgHex};background:${p.bgHex}`}>Aa</span>
+                </td>
+                <td>{p.use}</td>
+                <td><code>{p.fg}</code> sobre <code>{p.bg}</code></td>
+                <td class="num">{fmt(p.ratio)}:1</td>
+                <td>
+                  {p.level === 'prohibido' ? (
+                    <span class="badge badge--no">No usar para texto</span>
+                  ) : (
+                    <span class="badge badge--ok">
+                      Pasa {p.level === 'texto' ? 'texto (4.5)' : 'gráfico (3)'}
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="tipografia">
+      <h2 id="tipografia">Tipografía</h2>
+      <div class="rationale">
+        <p>
+          <strong>Títulos: Anton.</strong> Es más pesada y apretada que Bebas Neue y se parece más a los titulares de
+          sus piezas ("PRECIOS", "HORARIO DE ATENCIÓN"). Siempre en mayúsculas.{' '}
+          <strong>Texto e interfaz: Montserrat</strong> 400, 600 y 700, la misma de sus listas de beneficios y horarios.
+          Las dos se sirven desde el propio sitio.
+        </p>
+      </div>
+
+      <h3>Escala de títulos (Anton)</h3>
+      <ul class="type-list" role="list">
+        {typeSteps.map((t) => (
+          <li>
+            <span class="type-meta"><code>--step-{t.step}</code> {t.role}</span>
+            <span class="display" style={`font-size:var(--step-${t.step})`}>{t.sample}</span>
+          </li>
+        ))}
+      </ul>
+
+      <h3>Escala de texto (Montserrat)</h3>
+      <ul class="type-list" role="list">
+        {bodySteps.map((t) => (
+          <li>
+            <span class="type-meta"><code>--step-{t.step}</code> {t.role}</span>
+            <span style={`font-size:var(--step-${t.step})`}>
+              Acceso a ambas sedes, máquinas, zona de pesas y clases grupales sin costo extra.
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <h3>Pesos</h3>
+      <p class="weights">
+        <span style="font-weight:var(--weight-regular)">Regular 400</span>
+        <span style="font-weight:var(--weight-semibold)">Semibold 600</span>
+        <span style="font-weight:var(--weight-bold)">Bold 700</span>
+      </p>
+
+      <h3>Textura desgastada</h3>
+      <p class="muted">
+        Solo para titulares grandes. Es una máscara SVG ligera sobre texto real: se puede seleccionar y los lectores de
+        pantalla la leen igual.
+      </p>
+      <div class="worn-demo">
+        <p class="display texture-worn" style="font-size:var(--step-7)">Precios 2026</p>
+        <p class="display texture-worn" style="font-size:var(--step-6)">Clases grupales</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="espaciado">
+      <h2 id="espaciado">Espaciado</h2>
+      <p class="muted">Base de 4 px. Entre secciones y márgenes laterales se usan valores fluidos.</p>
+      <ul class="spaces" role="list">
+        {spaces.map((s) => (
+          <li>
+            <code>--space-{s}</code>
+            <span class="space-bar" style={`width:var(--space-${s})`}></span>
+          </li>
+        ))}
+        <li><code>--space-gutter</code><span class="space-bar" style="width:var(--space-gutter)"></span><span class="muted">16 → 40</span></li>
+        <li><code>--space-stack</code><span class="space-bar" style="width:var(--space-stack)"></span><span class="muted">32 → 64</span></li>
+        <li><code>--space-section</code><span class="space-bar" style="width:var(--space-section)"></span><span class="muted">64 → 128</span></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="formas">
+      <h2 id="formas">Radios, bordes y sombras</h2>
+      <ul class="shapes" role="list">
+        {radii.map((r) => (
+          <li><span class="shape" style={`border-radius:var(--radius-${r})`}></span><code>--radius-{r}</code></li>
+        ))}
+        <li><span class="shape shape--glow"></span><code>--shadow-glow-red</code></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="componentes">
+      <h2 id="componentes">Componentes base</h2>
+
+      <h3>Botones</h3>
+      <div class="row">
+        <Button href="#componentes">Escríbenos por WhatsApp</Button>
+        <Button href="#componentes" variant="secondary">Ver planes</Button>
+      </div>
+      <p class="muted">Pasa el mouse, enfoca con Tab o presiona para ver los estados. Altura mínima de 44 px.</p>
+
+      <h3>Recursos de las piezas</h3>
+      <div class="pieces">
+        <div class="hours-sample">
+          <p class="display hours-sample__title">Horario de atención</p>
+          <p class="label-tag"><span>Lunes a jueves</span></p>
+          <p class="hours-sample__time">5:00 a.m. a 10:00 p.m.</p>
+        </div>
+        <div class="wine-box">
+          <p class="display wine-box__title">Entrena donde quieras</p>
+          <p>Acceso a ambas sedes, máquinas y zona de pesas.</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="movimiento">
+      <h2 id="movimiento">Movimiento</h2>
+      <p class="muted">Seco y rápido, sin rebotes. Solo transform, opacity y clip-path. Con movimiento reducido, las duraciones bajan a 0.</p>
+      <div class="table-wrap">
+        <table class="contrast">
+          <thead><tr><th scope="col">Token</th><th scope="col">Valor</th><th scope="col">Uso</th></tr></thead>
+          <tbody>
+            {motion.map((m) => (
+              <tr><td><code>{m.token}</code></td><td>{m.value}</td><td>{m.use}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="stamp-trigger" data-stamp-trigger>Reproducir entrada tipo sello</button>
+      <p class="display stamp-demo" data-stamp>Imperial</p>
+    </section>
+  </main>
+
+  <script>
+    const trigger = document.querySelector('[data-stamp-trigger]');
+    const target = document.querySelector('[data-stamp]');
+    trigger?.addEventListener('click', () => {
+      target?.classList.remove('is-stamped');
+      void (target as HTMLElement | null)?.offsetWidth;
+      target?.classList.add('is-stamped');
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-8);
+    padding-block: var(--space-stack);
+    border-bottom: var(--border-thin) solid var(--color-border);
+  }
+  .page-head h1 {
+    font-size: var(--step-6);
+  }
+  .lead {
+    margin-top: var(--space-4);
+    font-size: var(--step-1);
+    color: var(--color-text-soft);
+  }
+  .note {
+    margin-top: var(--space-2);
+    font-size: var(--step--1);
+    color: var(--color-text-accent);
+  }
+  main > section {
+    padding-block: var(--space-stack);
+    border-bottom: var(--border-thin) solid var(--color-border);
+  }
+  h2 {
+    font-size: var(--step-5);
+    margin-bottom: var(--space-6);
+  }
+  h3 {
+    font-size: var(--step-3);
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-4);
+  }
+  .muted {
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+  code {
+    font-size: var(--step--1);
+    color: var(--color-text-soft);
+  }
+  .rationale {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    margin-bottom: var(--space-6);
+    background: var(--color-surface);
+    border-left: var(--border-thick) solid var(--color-accent);
+  }
+  .display {
+    font-family: var(--font-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    max-width: none;
+  }
+
+  /* Muestras */
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+    gap: var(--space-4);
+    padding: 0;
+    list-style: none;
+  }
+  .swatch {
+    display: grid;
+    gap: var(--space-1);
+    font-size: var(--step--1);
+  }
+  .swatch__chip {
+    display: block;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-md);
+  }
+  .swatch__chip--outlined {
+    outline: var(--border-thin) solid var(--color-border);
+  }
+  .swatch__ratios {
+    display: grid;
+    color: var(--color-text-muted);
+  }
+  .ratio-bar {
+    display: flex;
+    min-height: var(--space-16);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    font-size: var(--step--1);
+    font-weight: var(--weight-bold);
+  }
+  .ratio-bar span {
+    display: flex;
+    align-items: end;
+    padding: var(--space-2);
+    min-width: 0;
+  }
+
+  /* Tabla de contraste: en móvil se apila, sin scroll horizontal */
+  .table-wrap {
+    margin-top: var(--space-6);
+  }
+  .contrast {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+  .contrast th,
+  .contrast td {
+    padding: var(--space-3);
+    text-align: left;
+    border-bottom: var(--border-thin) solid var(--color-border);
+    vertical-align: middle;
+  }
+  .contrast th {
+    color: var(--color-text-muted);
+    font-weight: var(--weight-semibold);
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--weight-bold);
+  }
+  .sample {
+    display: inline-grid;
+    place-items: center;
+    width: var(--space-12);
+    height: var(--space-10);
+    border-radius: var(--radius-sm);
+    outline: var(--border-thin) solid var(--color-border);
+    font-weight: var(--weight-bold);
+    font-size: var(--step-1);
+  }
+  .badge {
+    display: inline-block;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-weight: var(--weight-semibold);
+    white-space: nowrap;
+  }
+  .badge--ok {
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+  }
+  .badge--no {
+    background: var(--color-label-bg);
+    color: var(--color-text-accent-on-light);
+  }
+  @media (max-width: 40rem) {
+    .contrast thead {
+      position: absolute;
+      clip: rect(0 0 0 0);
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .contrast tr {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-1) var(--space-3);
+      padding-block: var(--space-3);
+      border-bottom: var(--border-thin) solid var(--color-border);
+    }
+    .contrast td {
+      padding: 0;
+      border: 0;
+      grid-column: 2;
+    }
+    .contrast td:first-child {
+      grid-column: 1;
+      grid-row: 1 / span 4;
+    }
+  }
+
+  /* Tipografía */
+  .type-list {
+    display: grid;
+    gap: var(--space-6);
+    padding: 0;
+    list-style: none;
+  }
+  .type-list li {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .type-meta {
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+  .weights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+    font-size: var(--step-2);
+  }
+  .worn-demo {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-8) var(--space-6);
+    background: var(--color-accent-deep);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  /* Espaciado */
+  .spaces {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+  .spaces li {
+    display: grid;
+    grid-template-columns: 9rem auto 1fr;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .space-bar {
+    display: block;
+    height: var(--space-4);
+    background: var(--color-accent);
+  }
+
+  /* Formas */
+  .shapes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-8);
+    padding: 0;
+    list-style: none;
+  }
+  .shapes li {
+    display: grid;
+    gap: var(--space-2);
+    justify-items: start;
+  }
+  .shape {
+    width: var(--space-24);
+    height: var(--space-16);
+    background: var(--color-surface-raised);
+    border: var(--border-thin) solid var(--color-border-strong);
+  }
+  .shape--glow {
+    border-radius: var(--radius-md);
+    border-color: transparent;
+    box-shadow: var(--shadow-glow-red);
+  }
+
+  /* Componentes */
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-bottom: var(--space-3);
+  }
+  .pieces {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--col-min-md)), 1fr));
+    gap: var(--space-6);
+  }
+  .hours-sample {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: center;
+    padding: var(--space-8) var(--space-6);
+    background: var(--color-red-800);
+    border-radius: var(--radius-md);
+    text-align: center;
+  }
+  .hours-sample__title {
+    font-size: var(--step-5);
+  }
+  .label-tag span {
+    display: inline-block;
+    padding: var(--space-1) var(--space-4);
+    background: var(--color-label-bg);
+    color: var(--color-text-accent-on-light);
+    font-weight: var(--weight-bold);
+    font-size: var(--step-2);
+    text-transform: uppercase;
+  }
+  .hours-sample__time {
+    font-size: var(--step-2);
+  }
+  .wine-box {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    padding: var(--space-6);
+    background: var(--color-accent-deep);
+    border-radius: var(--radius-lg);
+  }
+  .wine-box__title {
+    font-size: var(--step-4);
+  }
+
+  /* Movimiento */
+  .stamp-trigger {
+    min-height: var(--target-min);
+    margin-top: var(--space-6);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-surface-raised);
+    border: var(--border-thin) solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+  }
+  .stamp-demo {
+    margin-top: var(--space-6);
+    font-size: var(--step-6);
+  }
+  .stamp-demo.is-stamped {
+    animation: stamp var(--duration-entrance) var(--ease-out-strong) both;
+  }
+  @keyframes stamp {
+    from {
+      opacity: 0;
+      transform: scale(1.04);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stamp-demo.is-stamped {
+      animation-name: fade-in;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+</style>

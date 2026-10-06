@@ -1,0 +1,61 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import Photo from './Photo.astro';
+import { photos } from '../data/photos';
+import Button from './Button.astro';
+import { merch } from '../data/merch';
+import { whatsappMessages } from '../data/site';
+import { whatsappUrl } from '../lib/whatsapp';
+import { formatPrice } from '../lib/format';
+---
+
+<section class="section" aria-labelledby="merch">
+  <div class="container">
+    <SectionHeading id="merch" title="Merch" />
+    {merch.map((item) => (
+      <article class="product" aria-labelledby={`producto-${item.id}`}>
+        <Photo {...photos.merch} ratio="1 / 1" sizes="(min-width: 48rem) 40vw, 100vw" />
+        <div class="product__body">
+          <h3 class="product__name" id={`producto-${item.id}`}>{item.name}</h3>
+          <p>{item.description}</p>
+          <p class="product__price">{formatPrice(item.price)}</p>
+          <Button
+            href={whatsappUrl(whatsappMessages.merch)}
+            icon="shopping-bag"
+            external
+            externalLabel="(abre WhatsApp)"
+          >
+            Pedir por WhatsApp
+          </Button>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .product {
+    display: grid;
+    gap: var(--space-6);
+    align-items: center;
+  }
+  .product__body {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+  }
+  .product__name {
+    font-size: var(--step-4);
+  }
+  .product__price {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    line-height: var(--leading-display);
+  }
+  @media (min-width: 48rem) {
+    .product {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: var(--space-12);
+    }
+  }
+</style>

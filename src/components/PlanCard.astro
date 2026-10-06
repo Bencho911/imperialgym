@@ -1,0 +1,219 @@
+---
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import type { Plan } from '../data/plans';
+import { whatsappUrl } from '../lib/whatsapp';
+import { whatsappMessages } from '../data/site';
+import { formatPrice } from '../lib/format';
+
+interface Props {
+  plan: Plan;
+}
+const { plan } = Astro.props;
+const headingId = `plan-${plan.id}`;
+---
+
+<article class:list={['plan', { 'plan--featured': plan.featured }]} aria-labelledby={headingId}>
+  <h3 id={headingId} class:list={['plan__name', { 'texture-worn': plan.featured }]}>{plan.name}</h3>
+
+  <div class="plan__body">
+    {plan.tagline && <p class="plan__tagline">{plan.tagline}</p>}
+
+    <ul class="plan__benefits" role="list">
+      {plan.benefits.map((b) => (
+        <li>
+          <Icon name="check" class="plan__check" />
+          <span>{b}</span>
+        </li>
+      ))}
+    </ul>
+
+    <p class="plan__price">
+      {plan.featured && plan.price !== null ? (
+        <>
+          <span class="visually-hidden">{formatPrice(plan.price)}</span>
+          <span class="plan__amount" aria-hidden="true" data-countup={plan.price}>{formatPrice(plan.price)}</span>
+        </>
+      ) : (
+        <span class="plan__amount">{formatPrice(plan.price)}</span>
+      )}
+      <span class="plan__period">{plan.period}</span>
+    </p>
+
+    <Button
+      href={whatsappUrl(whatsappMessages.plan(plan.name))}
+      variant={plan.featured ? 'primary' : 'secondary'}
+      icon="message-circle"
+      external
+      externalLabel="(abre WhatsApp)"
+      class="plan__cta"
+    >
+      {plan.featured ? `Quiero el ${plan.name}` : 'Preguntar por este plan'}
+    </Button>
+  </div>
+</article>
+
+<style>
+  .plan {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-6);
+    background: var(--color-surface);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+  .plan__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  .plan__name {
+    font-size: var(--step-4);
+  }
+  .plan__tagline {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: var(--leading-tight);
+    text-transform: uppercase;
+  }
+  .plan__benefits {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+    flex-grow: 1;
+    align-content: start;
+  }
+  .plan__benefits li {
+    display: flex;
+    gap: var(--space-2);
+    align-items: start;
+  }
+  .plan :global(.plan__check) {
+    margin-top: var(--space-1);
+    color: var(--color-text-accent);
+  }
+  .plan__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+  .plan__amount {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    line-height: var(--leading-display);
+  }
+  .plan__period {
+    color: var(--color-text-soft);
+  }
+  .plan :global(.plan__cta) {
+    align-self: stretch;
+  }
+
+  /* Plan destacado: caja vino, título grande y precio en caja roja, como en su pieza "Precios 2026". */
+  .plan--featured {
+    position: relative;
+    background: var(--color-accent-deep);
+    border: var(--border-thick) solid var(--color-accent);
+    padding: var(--space-8) var(--space-6);
+  }
+  .plan--featured .plan__name {
+    font-size: var(--step-6);
+  }
+  /* Brillo rojo al pasar el mouse: la sombra ya está pintada, solo cambia su opacidad. */
+  .plan--featured::after {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--border-thick));
+    border-radius: inherit;
+    box-shadow: var(--shadow-glow-red);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+  .plan--featured:hover::after,
+  .plan--featured:focus-within::after {
+    opacity: 1;
+  }
+  .plan--featured .plan__amount {
+    font-variant-numeric: tabular-nums;
+  }
+  .plan--featured :global(.plan__check) {
+    color: var(--color-text);
+  }
+  .plan--featured .plan__benefits {
+    font-weight: var(--weight-semibold);
+  }
+  .plan--featured .plan__price {
+    justify-self: start;
+    align-self: flex-start;
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-accent);
+    border-radius: var(--radius-md);
+  }
+  .plan--featured .plan__amount {
+    font-size: var(--step-5);
+  }
+  .plan--featured .plan__period {
+    color: var(--color-text-on-accent);
+    font-weight: var(--weight-semibold);
+  }
+
+  /* Escritorio: "PLAN ULTRA" en vertical, de abajo hacia arriba, como en la pieza original. */
+  @media (min-width: 48rem) {
+    .plan--featured {
+      grid-template-columns: auto 1fr;
+      gap: var(--space-8);
+      padding: var(--space-10) var(--space-8);
+    }
+    .plan--featured .plan__name {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: var(--step-6);
+      line-height: var(--leading-display);
+      align-self: stretch;
+      text-align: right;
+    }
+  }
+</style>
+
+<script>
+  import { formatPrice } from '../lib/format';
+
+  /* Conteo rápido del precio, una sola vez, cuando la tarjeta entra en pantalla. */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const targets = document.querySelectorAll<HTMLElement>('[data-countup]');
+
+  if (!reduced && 'IntersectionObserver' in window) {
+    const duration = 600;
+    const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - 2 ** (-10 * t));
+
+    const run = (el: HTMLElement) => {
+      const end = Number(el.dataset.countup);
+      const start = performance.now();
+      const step = (now: number) => {
+        const t = Math.min((now - start) / duration, 1);
+        // Redondea a miles para que el número no "tiemble" en las unidades.
+        el.textContent = formatPrice(Math.round((end * easeOutExpo(t)) / 1000) * 1000);
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          observer.unobserve(entry.target);
+          run(entry.target as HTMLElement);
+        }
+      },
+      { threshold: 0.6 },
+    );
+    targets.forEach((el) => {
+      el.textContent = formatPrice(0);
+      observer.observe(el);
+    });
+  }
+</script>

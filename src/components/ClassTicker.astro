@@ -1,0 +1,160 @@
+---
+/**
+ * Franja diagonal con los nombres de las clases, debajo de la portada.
+ * Se mueve en bucle (solo transform). Se pausa con el mouse, con el foco o con el botón
+ * (WCAG 2.2.2). Con reduced-motion queda quieta y la lista se acomoda en varias líneas.
+ */
+import ColumnMark from './ColumnMark.astro';
+import Icon from './Icon.astro';
+import { classNames } from '../data/classes';
+---
+
+<div class="ticker" data-ticker>
+  <div class="ticker__viewport">
+    <div class="ticker__track">
+      {/* 4 copias: la primera es la accesible; las demás solo rellenan el bucle en pantallas anchas. */}
+      {[0, 1, 2, 3].map((copy) => (
+        <ul
+          class="ticker__list"
+          role="list"
+          aria-label={copy === 0 ? 'Clases grupales' : undefined}
+          aria-hidden={copy > 0 ? 'true' : undefined}
+        >
+          {classNames.map((name) => (
+            <li>
+              <ColumnMark size="0.7em" class="ticker__mark" />
+              <span>{name}</span>
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+  </div>
+
+  <button type="button" class="ticker__toggle" data-ticker-toggle hidden>
+    <span class="ticker__icon ticker__icon--pause"><Icon name="pause" /></span>
+    <span class="ticker__icon ticker__icon--play"><Icon name="play" /></span>
+    <span class="visually-hidden" data-ticker-label>Pausar la cinta de clases</span>
+  </button>
+</div>
+
+<script>
+  const tickers = document.querySelectorAll<HTMLElement>('[data-ticker]');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  for (const ticker of tickers) {
+    const toggle = ticker.querySelector<HTMLButtonElement>('[data-ticker-toggle]');
+    const label = ticker.querySelector<HTMLElement>('[data-ticker-label]');
+    if (!toggle || !label || reduced) continue;
+
+    toggle.hidden = false;
+    toggle.addEventListener('click', () => {
+      const paused = ticker.classList.toggle('is-paused');
+      label.textContent = paused ? 'Reanudar la cinta de clases' : 'Pausar la cinta de clases';
+    });
+  }
+</script>
+
+<style>
+  .ticker {
+    position: relative;
+    z-index: var(--z-raised);
+    /* Franja en diagonal sin rotar el elemento: no genera scroll horizontal. */
+    margin-top: calc(-1 * var(--space-12));
+    padding-block: var(--space-12) var(--space-10);
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+    clip-path: polygon(0 var(--space-10), 100% 0, 100% calc(100% - var(--space-8)), 0 100%);
+  }
+  .ticker__viewport {
+    overflow: hidden;
+  }
+  .ticker__track {
+    display: flex;
+    width: max-content;
+  }
+  .ticker__list {
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--space-8);
+    padding: 0 var(--space-8) 0 0;
+    list-style: none;
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    line-height: var(--leading-display);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .ticker__list li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .ticker :global(.ticker__mark) {
+    opacity: 0.6;
+  }
+
+  .ticker__toggle {
+    position: absolute;
+    right: var(--space-gutter);
+    bottom: var(--space-8);
+    display: grid;
+    place-items: center;
+    width: var(--target-min);
+    height: var(--target-min);
+    padding: 0;
+    background: var(--color-accent-pressed);
+    border: 0;
+    border-radius: var(--radius-round);
+    color: var(--color-text-on-accent);
+    cursor: pointer;
+  }
+  .ticker__toggle:active {
+    transform: scale(0.94);
+  }
+  .ticker__toggle[hidden] {
+    display: none;
+  }
+  .ticker__icon--play,
+  .ticker.is-paused .ticker__icon--pause {
+    display: none;
+  }
+  .ticker.is-paused .ticker__icon--play {
+    display: contents;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ticker__track {
+      /* linear a propósito: movimiento continuo, no una transición de estado. */
+      animation: marquee var(--duration-marquee) linear infinite;
+    }
+    .ticker:hover .ticker__track,
+    .ticker:focus-within .ticker__track,
+    .ticker.is-paused .ticker__track {
+      animation-play-state: paused;
+    }
+  }
+  @keyframes marquee {
+    to {
+      transform: translateX(-25%);
+    }
+  }
+
+  /* Sin movimiento: una sola lista, centrada y en varias líneas. */
+  @media (prefers-reduced-motion: reduce) {
+    .ticker__track {
+      width: auto;
+    }
+    .ticker__list {
+      flex-wrap: wrap;
+      justify-content: center;
+      flex-shrink: 1;
+      gap: var(--space-2) var(--space-6);
+      padding: 0 var(--space-gutter);
+      white-space: normal;
+    }
+    .ticker__list[aria-hidden='true'] {
+      display: none;
+    }
+  }
+</style>

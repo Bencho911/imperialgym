@@ -1,0 +1,66 @@
+/*
+  Animaciones compartidas (fase 4). Carácter: seco y rápido, como un golpe.
+  Solo transform, opacity y clip-path. Cada entrada corre una vez (ver src/scripts/reveal.ts).
+  Con prefers-reduced-motion: sin desplazamientos ni escalas, solo opacidad muy corta.
+*/
+
+/* ── Títulos de sección: "sello" (aparece rápido y asienta de 1.04 a 1) ── */
+[data-reveal='stamp'][data-reveal-state='pending'] {
+  opacity: 0;
+}
+[data-reveal='stamp'][data-reveal-state='in'] {
+  transform-origin: left center;
+  animation: stamp var(--duration-slow) var(--ease-out-strong) both;
+}
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Fotos: una capa roja se desliza y descubre la imagen ── */
+[data-reveal='photo'] {
+  position: relative;
+  overflow: hidden;
+}
+[data-reveal='photo'][data-reveal-state]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  transform-origin: right center;
+}
+[data-reveal='photo'][data-reveal-state='in']::after {
+  animation: wipe-off var(--duration-entrance) var(--ease-out-strong) both;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+@keyframes wipe-off {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal='stamp'][data-reveal-state='in'] {
+    animation-name: fade-in;
+  }
+  [data-reveal='photo'][data-reveal-state='in']::after {
+    animation-name: fade-out;
+  }
+}

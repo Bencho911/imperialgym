@@ -1,0 +1,77 @@
+---
+import Icon, { type IconName } from './Icon.astro';
+import { locations } from '../data/locations';
+import { classNames } from '../data/classes';
+import { hours } from '../data/hours';
+import { formatTime } from '../lib/format';
+
+/* Todo se arma desde src/data para que no quede desactualizado. */
+const lowerList = (items: string[]) =>
+  items.map((s) => s.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' y $1');
+
+const benefits: { icon: IconName; title: string; text: string }[] = [
+  {
+    icon: 'map-pin',
+    title: 'Dos sedes',
+    text: `${locations.map((l) => `Sede ${l.name}`).join(' y ')}. Con el Plan Ultra entrenas en ambas.`,
+  },
+  {
+    icon: 'users',
+    title: 'Clases grupales',
+    text: `${lowerList(classNames).replace(/^./, (c) => c.toUpperCase())}. Sin costo extra en el Plan Ultra.`,
+  },
+  {
+    icon: 'clock',
+    title: 'Horario amplio',
+    text: `Desde las ${formatTime(hours[0].opens)} entre semana, en jornada continua.`,
+  },
+  {
+    icon: 'dumbbell',
+    title: 'Entrenador y app de rutinas',
+    text: 'Apoyo de entrenador y app de rutinas incluidos en el Plan Ultra.',
+  },
+];
+---
+
+<section class="benefits" aria-labelledby="beneficios">
+  <h2 id="beneficios" class="visually-hidden">Por qué entrenar en Imperial Gym</h2>
+  <ul class="container benefits__list" role="list">
+    {benefits.map((b) => (
+      <li class="benefit">
+        <Icon name={b.icon} size="var(--icon-lg)" class="benefit__icon" />
+        <h3 class="benefit__title">{b.title}</h3>
+        <p class="benefit__text">{b.text}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .benefits {
+    padding-block: var(--space-stack);
+  }
+  .benefits__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--col-min-sm)), 1fr));
+    gap: var(--space-8);
+    padding: 0;
+    list-style: none;
+  }
+  .benefit {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+    padding-left: var(--space-4);
+    border-left: var(--border-thick) solid var(--color-accent);
+  }
+  .benefit :global(.benefit__icon) {
+    color: var(--color-text-accent);
+  }
+  .benefit__title {
+    font-size: var(--step-3);
+  }
+  .benefit__text {
+    font-size: var(--step--1);
+    color: var(--color-text-soft);
+  }
+</style>

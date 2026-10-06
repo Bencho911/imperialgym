@@ -1,0 +1,49 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import PlanCard from './PlanCard.astro';
+import { plans, plansNote } from '../data/plans';
+
+const featured = plans.filter((p) => p.featured);
+const others = plans.filter((p) => !p.featured);
+---
+
+<section class="section" aria-labelledby="planes">
+  <div class="container">
+    <SectionHeading id="planes" title="Planes" intro="Elige tu plan y escríbenos para inscribirte." />
+    <div class="plans">
+      {featured.map((plan) => <PlanCard plan={plan} />)}
+      {others.length > 0 && (
+        <div class="plans__others">
+          {others.map((plan) => <PlanCard plan={plan} />)}
+        </div>
+      )}
+    </div>
+    <p class="plans__note">{plansNote}</p>
+  </div>
+</section>
+
+<style>
+  .plans {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .plans__others {
+    display: grid;
+    gap: var(--space-6);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--col-min-md)), 1fr));
+  }
+  .plans__note {
+    margin-top: var(--space-6);
+    font-size: var(--step--1);
+    color: var(--color-text-muted);
+  }
+  @media (min-width: 64rem) {
+    .plans {
+      grid-template-columns: 3fr 2fr;
+      align-items: start;
+    }
+    .plans__others {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

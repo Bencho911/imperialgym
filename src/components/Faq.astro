@@ -1,0 +1,60 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import Icon from './Icon.astro';
+import { faq } from '../data/faq';
+---
+
+<section class="section" aria-labelledby="preguntas">
+  <div class="container faq-container">
+    <SectionHeading id="preguntas" title="Preguntas frecuentes" />
+    <div class="faq">
+      {faq.map((item) => (
+        <details class="faq__item">
+          <summary class="faq__question">
+            <span>{item.question}</span>
+            <Icon name="chevron-down" class="faq__chevron" />
+          </summary>
+          <p class="faq__answer">{item.answer}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq-container {
+    max-width: var(--container-narrow);
+  }
+  .faq {
+    border-top: var(--border-thin) solid var(--color-border);
+  }
+  .faq__item {
+    border-bottom: var(--border-thin) solid var(--color-border);
+  }
+  .faq__question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: var(--target-min);
+    padding-block: var(--space-4);
+    font-weight: var(--weight-bold);
+    font-size: var(--step-1);
+    cursor: pointer;
+    list-style: none;
+  }
+  .faq__question::-webkit-details-marker {
+    display: none;
+  }
+  .faq__item :global(.faq__chevron) {
+    color: var(--color-text-accent);
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+  .faq__item[open] :global(.faq__chevron) {
+    transform: rotate(180deg);
+  }
+  .faq__answer {
+    padding-bottom: var(--space-5);
+    color: var(--color-text-soft);
+  }
+</style>

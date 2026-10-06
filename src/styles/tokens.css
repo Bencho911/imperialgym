@@ -1,0 +1,171 @@
+/*
+  Imperial Gym — tokens de diseño.
+  Única fuente de verdad para color, tipografía, espaciado, radios, bordes y movimiento.
+  Los componentes usan SOLO tokens semánticos (sección "Semánticos"), nunca hex sueltos.
+  Los contrastes se verifican automáticamente en /estilos (lee este archivo en el build).
+*/
+
+:root {
+  /* ───────────── Color: marca original (medido de capturas) ───────────── */
+  --color-red-vivid: #F01C18; /* M del logo. Solo logo y gráficos grandes (3:1 sobre negro) */
+  --color-red-brand: #8B1D14; /* Rojo de las piezas = red-800 */
+  --color-red-wine: #5E1913;  /* Cajas oscuras = red-900 */
+  --color-red-merch: #B11527; /* Rojo del merch = red-600, rojo principal de interfaz */
+  --color-black: #0E0F11;
+  --color-white: #FFFFFF;
+
+  /* ───────────── Color: escala roja (ancla: 600 = rojo merch) ───────────── */
+  --color-red-50: #FFF1F1;
+  --color-red-100: #FFDFDF;
+  --color-red-200: #FFC2C3;
+  --color-red-300: #FF9396;
+  --color-red-400: #F85A62; /* texto rojo sobre fondo oscuro */
+  --color-red-500: #DC2A35; /* hover de botón (blanco encima 4.74:1) */
+  --color-red-600: #B11527; /* acción principal */
+  --color-red-700: #9C1722; /* pressed */
+  --color-red-800: #8B1D14; /* rojo de marca, texto rojo sobre blanco */
+  --color-red-900: #5E1913; /* cajas y fondos vino */
+  --color-red-950: #360C09;
+
+  /* ───────────── Color: neutros (base fría, a partir del negro de marca) ───────────── */
+  --color-neutral-950: #0E0F11;
+  --color-neutral-900: #16171A;
+  --color-neutral-800: #1F2024;
+  --color-neutral-700: #2C2E33;
+  --color-neutral-500: #5C6069; /* solo bordes y gráficos, nunca texto */
+  --color-neutral-400: #8F939B; /* texto secundario */
+  --color-neutral-300: #B4B7BD;
+  --color-neutral-200: #D6D8DC;
+  --color-neutral-0: #FFFFFF;
+
+  /* ───────────── Semánticos ───────────── */
+  --color-bg: var(--color-neutral-950);
+  --color-surface: var(--color-neutral-900);
+  --color-surface-raised: var(--color-neutral-800);
+  --color-border: var(--color-neutral-700);
+  --color-border-strong: var(--color-neutral-500);
+
+  --color-text: var(--color-neutral-0);
+  --color-text-muted: var(--color-neutral-400);
+  --color-text-soft: var(--color-neutral-300);
+  --color-text-on-accent: var(--color-neutral-0);
+  --color-text-accent: var(--color-red-400);      /* rojo legible sobre oscuro */
+  --color-text-on-light: var(--color-neutral-950);
+  --color-text-accent-on-light: var(--color-red-800);
+
+  --color-accent: var(--color-red-600);
+  --color-accent-hover: var(--color-red-500);
+  --color-accent-pressed: var(--color-red-700);
+  --color-accent-deep: var(--color-red-900);
+  --color-label-bg: var(--color-neutral-0);        /* etiquetas blancas, como en "Horario de atención" */
+
+  --color-focus: var(--color-neutral-0);
+  --color-overlay: rgb(14 15 17 / 0.72);          /* capa oscura sobre foto */
+  --color-overlay-red: rgb(94 25 19 / 0.86);      /* caja vino semitransparente sobre foto */
+
+  /* ───────────── Tipografía ───────────── */
+  --font-display: "Anton", "Anton Fallback", "Anton Fallback Narrow", sans-serif;
+  --font-body: "Montserrat", "Segoe UI", system-ui, sans-serif;
+
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Escala fluida 360 → 1440 px. Texto: ratio ~1.125–1.25. Display: crece fuerte. */
+  --step--1: clamp(0.8125rem, 0.7917rem + 0.0926vw, 0.875rem);
+  --step-0: clamp(1rem, 0.9583rem + 0.1852vw, 1.125rem);
+  --step-1: clamp(1.125rem, 1.0625rem + 0.2778vw, 1.3125rem);
+  --step-2: clamp(1.3125rem, 1.2083rem + 0.463vw, 1.625rem);
+  --step-3: clamp(1.5625rem, 1.375rem + 0.8333vw, 2.125rem);
+  --step-4: clamp(1.875rem, 1.5417rem + 1.4815vw, 2.875rem);
+  --step-5: clamp(2.375rem, 1.8333rem + 2.4074vw, 4rem);
+  --step-6: clamp(3rem, 2rem + 4.4444vw, 6rem);
+  --step-7: clamp(3.75rem, 2rem + 7.7778vw, 9rem);
+
+  --leading-display: 1.12; /* menos no deja espacio a tildes en mayúscula (Ñ, Ó, É) */
+  --leading-tight: 1.2;
+  --leading-body: 1.6;
+  --tracking-display: 0.01em;
+  --tracking-label: 0.04em;
+  --measure: 65ch;
+
+  /* ───────────── Espaciado (base 4 px) ───────────── */
+  --space-1: 0.25rem;  /* 4 */
+  --space-2: 0.5rem;   /* 8 */
+  --space-3: 0.75rem;  /* 12 */
+  --space-4: 1rem;     /* 16 */
+  --space-5: 1.25rem;  /* 20 */
+  --space-6: 1.5rem;   /* 24 */
+  --space-8: 2rem;     /* 32 */
+  --space-10: 2.5rem;  /* 40 */
+  --space-12: 3rem;    /* 48 */
+  --space-16: 4rem;    /* 64 */
+  --space-20: 5rem;    /* 80 */
+  --space-24: 6rem;    /* 96 */
+
+  --space-gutter: clamp(1rem, 0.5rem + 2.2222vw, 2.5rem);    /* 16 → 40 */
+  --space-stack: clamp(2rem, 1.3333rem + 2.963vw, 4rem);     /* 32 → 64 */
+  --space-section: clamp(4rem, 2.6667rem + 5.9259vw, 8rem);  /* 64 → 128 */
+
+  /* ───────────── Layout ───────────── */
+  --container-max: 75rem;     /* 1200 */
+  --container-narrow: 48rem;  /* 768 */
+  --header-height: 4rem;
+  --target-min: 2.75rem;      /* 44 px, objetivo táctil mínimo */
+  --hero-max-height: 60rem;
+  --icon-md: 1.5rem;          /* 24 px: íconos de controles */
+  --icon-lg: 1.75rem;         /* 28 px: íconos destacados */
+  /* Ancho mínimo de columna en rejillas auto-fit. Breakpoints (en media queries): 40rem, 48rem, 64rem. */
+  --col-min-sm: 14rem;
+  --col-min-md: 18rem;
+  --col-min-lg: 22rem;
+
+  /* ───────────── Radios (pequeños, como las cajas de las piezas) ───────────── */
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-round: 999px;
+
+  /* ───────────── Bordes ───────────── */
+  --border-thin: 1px;
+  --border-thick: 2px;
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 3px;
+
+  /* ───────────── Sombras (casi no se usan: el fondo es oscuro) ───────────── */
+  --shadow-raised: 0 12px 32px rgb(0 0 0 / 0.45);
+  --shadow-glow-red: 0 0 0 1px var(--color-accent), 0 12px 40px rgb(177 21 39 / 0.35);
+
+  /* ───────────── Movimiento: seco, rápido, sin rebotes ───────────── */
+  --duration-instant: 100ms;
+  --duration-fast: 160ms;   /* hover, press */
+  --duration-base: 240ms;   /* cambios de estado de interfaz */
+  --duration-slow: 400ms;   /* menú, filtros */
+  --duration-entrance: 700ms; /* entradas de sección, máximo */
+  --duration-ambient: 2400ms; /* zoom lento de la foto de portada, una vez */
+  --duration-marquee: 20s;    /* recorrido de una copia de la cinta de clases */
+  --stagger: 40ms;            /* retraso entre elementos escalonados (máx. 50 ms) */
+
+  --ease-out-strong: cubic-bezier(0.16, 1, 0.3, 1);  /* tipo expo.out */
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);        /* tipo power3.out */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in: cubic-bezier(0.32, 0, 0.67, 0);
+
+  /* ───────────── Capas ───────────── */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-header: 100;
+  --z-fab: 200;
+  --z-menu: 300;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-entrance: 120ms; /* solo opacidad, muy corta */
+    --duration-ambient: 0ms;
+    --stagger: 0ms;
+  }
+}

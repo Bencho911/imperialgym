@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Máscara de desgaste LIGERA (titulares pequeños, móvil): opaco = se ve el texto, agujeros = desgaste. Ligera (sin imagen raster). -->
+  <filter id="w" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="3" seed="7" stitchTiles="stitch" result="fine"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" stitchTiles="stitch" result="coarse"/>
+    <feBlend in="fine" in2="coarse" mode="multiply" result="mix"/>
+    <feColorMatrix in="mix" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -60 0 0 0 33"/>
+  </filter>
+  <rect width="512" height="512" fill="#fff" filter="url(#w)"/>
+</svg>

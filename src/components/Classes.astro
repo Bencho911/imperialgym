@@ -1,0 +1,230 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import { classes, days } from '../data/classes';
+import { locations, locationName } from '../data/locations';
+import { whatsappMessages } from '../data/site';
+import { whatsappUrl } from '../lib/whatsapp';
+import { formatTime } from '../lib/format';
+
+/* Agrupa por día en orden de semana y por hora dentro de cada día. Los días sin clases no se muestran. */
+const schedule = days
+  .map((day) => ({
+    ...day,
+    items: classes.filter((c) => c.day === day.id).sort((a, b) => a.time.localeCompare(b.time)),
+  }))
+  .filter((day) => day.items.length > 0);
+---
+
+<section class="section" aria-labelledby="clases">
+  <div class="container">
+    <SectionHeading
+      id="clases"
+      title="Clases grupales"
+      intro="Programación semanal. Las clases están incluidas en el Plan Ultra."
+    />
+
+    <!-- Filtro por sede: oculto sin JavaScript (entonces se ven todas las clases). -->
+    <fieldset class="filter" data-class-filter hidden>
+      <legend class="filter__legend">Ver clases de</legend>
+      <div class="filter__options">
+        <label class="filter__option">
+          <input type="radio" name="sede" value="todas" checked />
+          <span>Todas las sedes</span>
+        </label>
+        {locations.map((loc) => (
+          <label class="filter__option">
+            <input type="radio" name="sede" value={loc.id} />
+            <span>Sede {loc.name}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+    <p class="visually-hidden" aria-live="polite" data-class-status></p>
+
+    <div class="schedule">
+      {schedule.map((day) => (
+        <section class="day" aria-labelledby={`dia-${day.id}`} data-day style={`view-transition-name: dia-${day.id}`}>
+          <h3 class="day__title" id={`dia-${day.id}`}>{day.label}</h3>
+          <ul class="day__list" role="list">
+            {day.items.map((c, i) => {
+              const location = locationName(c.location);
+              const time = formatTime(c.time);
+              return (
+                <li
+                  class="class-item"
+                  data-location={c.location}
+                  style={`view-transition-name: clase-${day.id}-${i}`}
+                >
+                  <p class="class-item__name">{c.name}</p>
+                  <p class="class-item__meta">
+                    <time datetime={c.time}>{time}</time>
+                    <span>Sede {location}</span>
+                  </p>
+                  <a
+                    class="class-item__link"
+                    href={whatsappUrl(whatsappMessages.class(c.name, location, day.label.toLowerCase(), time))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Preguntar por WhatsApp
+                    <span class="visually-hidden">
+                      sobre {c.name}, {day.label} {time}, Sede {location} (abre WhatsApp)
+                    </span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .schedule {
+    display: grid;
+    gap: var(--space-8);
+  }
+  .day {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+  }
+  .day__title {
+    font-size: var(--step-4);
+  }
+  .day__list {
+    display: grid;
+    gap: var(--space-3);
+    padding: 0;
+    list-style: none;
+  }
+  /* Cajas vino, como las tarjetas de su pieza "Clases grupales". */
+  .class-item {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    background: var(--color-accent-deep);
+    border-radius: var(--radius-lg);
+  }
+  .class-item__name {
+    font-weight: var(--weight-bold);
+    font-size: var(--step-1);
+    text-transform: uppercase;
+  }
+  .class-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    font-size: var(--step--1);
+  }
+  .class-item__meta time {
+    font-weight: var(--weight-bold);
+    color: var(--color-text);
+  }
+  .class-item__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+    justify-self: start;
+    font-size: var(--step--1);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text);
+    text-decoration-color: var(--color-red-400);
+    text-decoration-thickness: var(--border-thick);
+  }
+  .class-item__link:hover {
+    text-decoration-color: var(--color-text);
+  }
+
+  @media (min-width: 40rem) {
+    .schedule {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .schedule {
+      /* auto-fill: al filtrar, las columnas conservan su ancho. */
+      grid-template-columns: repeat(auto-fill, minmax(var(--col-min-sm), 1fr));
+      gap: var(--space-4);
+    }
+  }
+
+  /* Filtro por sede: control segmentado con radios nativos. */
+  .filter {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-8);
+    padding: 0;
+    border: 0;
+  }
+  .filter__legend {
+    padding: 0;
+    margin-bottom: var(--space-3);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-soft);
+  }
+  .filter__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .filter__option {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+  }
+  .filter__option input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .filter__option span {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+    padding: var(--space-2) var(--space-5);
+    border: var(--border-thick) solid var(--color-border-strong);
+    border-radius: var(--radius-round);
+    font-weight: var(--weight-semibold);
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out),
+      transform var(--duration-instant) var(--ease-out);
+  }
+  .filter__option:active span {
+    transform: scale(0.97);
+  }
+  .filter__option:hover span {
+    border-color: var(--color-text);
+  }
+  .filter__option input:checked + span {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text-on-accent);
+  }
+  .filter__option input:focus-visible + span {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+</style>
+
+<script>
+  import { initClassFilter } from '../scripts/class-filter';
+  initClassFilter();
+</script>
+
+<style is:global>
+  /* Reacomodo del filtro (View Transitions): seco y rápido. El resto de la página no hace fundido. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+  ::view-transition-group(*) {
+    animation-duration: var(--duration-base);
+    animation-timing-function: var(--ease-out-strong);
+  }
+</style>

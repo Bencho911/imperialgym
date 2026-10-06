@@ -1,0 +1,58 @@
+---
+/**
+ * Datos estructurados (JSON-LD) para Google: una organización y un ExerciseGym por sede.
+ * Todo sale de src/data. Los valores entre [CORCHETES] son pendientes (ver PENDIENTES.md):
+ * reemplazarlos antes de publicar, porque Google los mostraría tal cual.
+ */
+import { site } from '../data/site';
+import { locations } from '../data/locations';
+import { hours } from '../data/hours';
+
+const base = Astro.site!;
+const orgId = new URL('#organizacion', base).href;
+
+const openingHoursSpecification = hours.map((row) => ({
+  '@type': 'OpeningHoursSpecification',
+  dayOfWeek: row.days.map((d) => `https://schema.org/${d}`),
+  opens: row.opens,
+  closes: row.closes,
+}));
+
+const sameAs = site.instagram.url ? [site.instagram.url] : undefined;
+const phone = (digits: string | null, label: string) => (digits ? `+${digits}` : label);
+
+const graph = [
+  {
+    '@type': 'Organization',
+    '@id': orgId,
+    name: site.name,
+    url: base.href,
+    logo: new URL('/apple-touch-icon.png', base).href,
+    sameAs,
+  },
+  ...locations.map((loc) => ({
+    '@type': 'ExerciseGym',
+    '@id': new URL(`#sede-${loc.id}`, base).href,
+    name: `${site.name} Sede ${loc.name}`,
+    url: new URL(`/#sedes`, base).href,
+    image: new URL('/og-image.png', base).href,
+    telephone: phone(loc.whatsapp ?? site.whatsapp, `[TELÉFONO SEDE ${loc.name.toUpperCase()}]`),
+    priceRange: '[RANGO DE PRECIOS]',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: loc.address,
+      addressLocality: site.city,
+      addressRegion: site.region,
+      addressCountry: 'CO',
+    },
+    ...(loc.mapsUrl ? { hasMap: loc.mapsUrl } : {}),
+    openingHoursSpecification,
+    parentOrganization: { '@id': orgId },
+    sameAs,
+  })),
+];
+
+const json = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
+---
+
+<script type="application/ld+json" set:html={json} />

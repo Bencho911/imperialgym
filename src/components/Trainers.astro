@@ -1,0 +1,104 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import Photo from './Photo.astro';
+import Icon from './Icon.astro';
+import { trainers } from '../data/trainers';
+import { locationName, type LocationId } from '../data/locations';
+
+/* Quita corchetes del nombre para la etiqueta del marcador: [FOTO: NOMBRE ENTRENADOR]. */
+const plain = (s: string) => s.replace(/[[\]]/g, '');
+
+const sedesLabel = (ids: LocationId[]) =>
+  ids.length > 1 ? 'Ambas sedes' : `Sede ${locationName(ids[0])}`;
+---
+
+<section class="section" aria-labelledby="entrenadores">
+  <div class="container">
+    <SectionHeading
+      id="entrenadores"
+      title="Entrenadores"
+      intro="Conoce a quienes te acompañan en la sala. El apoyo de entrenador está incluido en el Plan Ultra."
+    />
+    <ul class="trainers" role="list">
+      {trainers.map((t, i) => (
+        <li class="trainer">
+          <div data-reveal="photo" style={`--i: ${i % 4}`} class="trainer__photo">
+            <Photo
+              image={t.image}
+              alt={`${t.name}, entrenador de Imperial Gym`}
+              label={`[FOTO: ${plain(t.name)}]`}
+              ratio="4 / 5"
+              sizes="(min-width: 64rem) 25vw, (min-width: 40rem) 50vw, 100vw"
+            />
+          </div>
+          <h3 class="trainer__name">{t.name}</h3>
+          <p class="trainer__specialty">{t.specialty}</p>
+          <p class="trainer__location">
+            <Icon name="map-pin" />
+            <span>{sedesLabel(t.locations)}</span>
+          </p>
+          {t.instagram && (
+            <a class="trainer__social" href={t.instagram} target="_blank" rel="noopener noreferrer">
+              <Icon name="instagram" />
+              <span>Instagram</span>
+              <span class="visually-hidden">de {t.name} (abre Instagram)</span>
+            </a>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* Móvil: 2 columnas (fotos verticales). Desde 48rem: tantas como quepan, llenando el ancho. */
+  .trainers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-8) var(--space-3);
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .trainers {
+      grid-template-columns: repeat(auto-fit, minmax(var(--col-min-sm), 1fr));
+      gap: var(--space-8) var(--space-4);
+    }
+  }
+  .trainer {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+  }
+  .trainer__photo {
+    margin-bottom: var(--space-2);
+    border-radius: var(--radius-md);
+  }
+  .trainer__name {
+    font-size: var(--step-3);
+  }
+  .trainer__specialty {
+    font-weight: var(--weight-semibold);
+  }
+  .trainer__location {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--step--1);
+    color: var(--color-text-soft);
+  }
+  .trainer__location :global(.icon) {
+    color: var(--color-text-accent);
+  }
+  .trainer__social {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--target-min);
+    justify-self: start;
+    font-size: var(--step--1);
+    font-weight: var(--weight-semibold);
+    text-decoration-color: var(--color-red-400);
+    text-decoration-thickness: var(--border-thick);
+  }
+</style>
